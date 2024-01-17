@@ -234,9 +234,6 @@ add_variables_data <- function(data,
   if (!hasArg(name)) name <- which
   
   # Check dataset
-  if (!hasArg(dataset)) dataset <- data_attributes[["dataset"]]
-  
-  # Check dataset
   dataset <- get_dataset(dataset)
   
   # Get variables from data frame

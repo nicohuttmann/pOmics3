@@ -4,17 +4,17 @@
 \alias{get_observations_data}
 \title{Return observations data}
 \usage{
-get_observations_data(which, observations, output.type = "tibble", dataset)
+get_observations_data(which, observations, dataset, output.type = "tibble")
 }
 \arguments{
 \item{which}{which observations data to pull}
 
 \item{observations}{(optional) vector of observations or expression}
 
+\item{dataset}{dataset}
+
 \item{output.type}{output type (default = "tibble"; "data.frame", "vector", 
 "list")}
-
-\item{dataset}{dataset}
 }
 \description{
 Return observations data

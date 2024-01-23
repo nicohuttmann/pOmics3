@@ -4,7 +4,7 @@
 \alias{get_data_frame}
 \title{Assemble data from dataset and return in list}
 \usage{
-get_data_frame(which, variables, observations, output.type = "tibble", dataset)
+get_data_frame(which, variables, observations, dataset, output.type = "tibble")
 }
 \arguments{
 \item{which}{specific name of data type}
@@ -13,9 +13,9 @@ get_data_frame(which, variables, observations, output.type = "tibble", dataset)
 
 \item{observations}{selected observations}
 
-\item{output.type}{data type (default = "tibble")}
-
 \item{dataset}{dataset name}
+
+\item{output.type}{data type (default = "tibble")}
 }
 \description{
 Assemble data from dataset and return in list

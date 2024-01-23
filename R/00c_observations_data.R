@@ -79,9 +79,9 @@ get_observations <- function(observations, dataset) {
 #'
 #' @param which which observations data to pull
 #' @param observations (optional) vector of observations or expression
+#' @param dataset dataset
 #' @param output.type output type (default = "tibble"; "data.frame", "vector", 
 #'  "list")
-#' @param dataset dataset
 #'
 #' @return
 #' @export
@@ -91,8 +91,8 @@ get_observations <- function(observations, dataset) {
 #'
 get_observations_data <- function(which,
                                   observations,
-                                  output.type = "tibble",
-                                  dataset) {
+                                  dataset, 
+                                  output.type = "tibble") {
   
   # Check dataset
   dataset <- get_dataset(dataset = dataset)
@@ -388,11 +388,11 @@ save_observations_data <- function(data_frame,
                        by = "observations")
     
     # Completion message
-    message("Following observations data columns were saved in the <dataset> ", 
+    message("Following observations data columns were saved to the <dataset> ", 
             dataset, ": ", paste(name, collapse = ", "), ".")
     
     # Return
-    return(data_frame)
+    return(invisible(data_frame))
     
     # Save data from vector input
   } else if (is.atomic(data_frame)) {
@@ -434,10 +434,11 @@ save_observations_data <- function(data_frame,
       dplyr::mutate(!!name := unname(template))
     
     # Completion message
-    message("Following observations data columns were saved in the <dataset> ", 
+    message("Following observations data columns were saved to the <dataset> ", 
             dataset, ": ", paste(name, collapse = ", "), ".")
     
-    return(data_frame)
+    # Return 
+    return(invisible(data_frame))
     
   } else {
     

@@ -3,8 +3,8 @@
 #' @param which specific name of data type
 #' @param variables selected variables
 #' @param observations selected observations
-#' @param output.type data type (default = "tibble")
 #' @param dataset dataset name 
+#' @param output.type data type (default = "tibble")
 #'
 #' @return
 #' @export
@@ -13,8 +13,8 @@
 get_data_frame <- function(which,
                            variables,
                            observations,
-                           output.type = "tibble", 
-                           dataset) {
+                           dataset, 
+                           output.type = "tibble") {
   
   
   # Default data name
@@ -173,6 +173,6 @@ save_data_frame <- function(data_frame,
   message("The <data_frame> ", data_frame, " was saved in the <dataset> ", 
           dataset, ".")
   # Return
-  return(data_frame)
+  return(invisible(data_frame))
   
 }

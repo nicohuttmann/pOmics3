@@ -57,6 +57,9 @@ save_dataset <- function(dataset, name) {
   # Add dataset
   Datasets[[name]] <<- dataset
   
+  # Completion message
+  message("The <dataset> ", name, " was saved under Datasets.")
+  
   # Indicate if new info list was created
   return(invisible(TRUE))
   

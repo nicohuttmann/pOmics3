@@ -51,9 +51,10 @@ get_variables <- function(variables, dataset) {
 #'
 #' @param which which variables data columns to pull (multiple supported)
 #' @param variables (optional) vector of variables or expression
+#' @param dataset dataset
 #' @param output.type output type (default = "tibble"; "data.frame", "vector", 
 #'  "list")
-#' @param dataset dataset
+#'  
 #'
 #' @return
 #' @export
@@ -61,10 +62,9 @@ get_variables <- function(variables, dataset) {
 #' @importFrom magrittr %>%
 #'
 get_variables_data <- function(which,
-                               variables,
-                               output.type = "tibble",
-                               output.name, 
-                               dataset) {
+                               variables, 
+                               dataset,
+                               output.type = "tibble") {
   
   # Check dataset
   dataset <- get_dataset(dataset = dataset)
@@ -361,11 +361,11 @@ save_variables_data <- function(data_frame,
                        by = "variables")
     
     # Completion message
-    message("Following variables data columns were saved in the <dataset> ", 
+    message("Following variables data columns were saved to the <dataset> ", 
             dataset, ": ", paste(name, collapse = ", "), ".")
     
     # Return
-    return(data_frame)
+    return(invisible(data_frame))
     
     # Save data from vector input
   } else if (is.atomic(data_frame)) {
@@ -409,11 +409,11 @@ save_variables_data <- function(data_frame,
       dplyr::mutate(!!name := unname(template))
     
     # Completion message
-    message("Following variables data columns were saved in the <dataset> ", 
+    message("Following variables data columns were saved to the <dataset> ", 
             dataset, ": ", paste(name, collapse = ", "), ".")
     
     # Return
-    return(data_frame)
+    return(invisible(data_frame))
     
   } else {
     

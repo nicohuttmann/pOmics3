@@ -4,23 +4,17 @@
 \alias{get_variables_data}
 \title{Return variables data}
 \usage{
-get_variables_data(
-  which,
-  variables,
-  output.type = "tibble",
-  output.name,
-  dataset
-)
+get_variables_data(which, variables, dataset, output.type = "tibble")
 }
 \arguments{
 \item{which}{which variables data columns to pull (multiple supported)}
 
 \item{variables}{(optional) vector of variables or expression}
 
+\item{dataset}{dataset}
+
 \item{output.type}{output type (default = "tibble"; "data.frame", "vector", 
 "list")}
-
-\item{dataset}{dataset}
 }
 \description{
 Return variables data

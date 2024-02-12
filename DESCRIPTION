@@ -1,7 +1,7 @@
 Package: pOmics3
 Type: Package
 Title: pOmics3
-Version: 0.1
+Version: 0.2
 Author: Nico Huettmann 
 Maintainer: Nico Huettmann <huttmann.nico@gmail.com>
 Description: Functional Proteomics Data Analysis in R

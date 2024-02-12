@@ -170,7 +170,7 @@ save_data_frame <- function(data_frame,
   Datasets[[dataset]][["Data_frames"]][[name]] <<- data_frame
   
   # Completion message
-  message("The <data_frame> ", data_frame, " was saved in the <dataset> ", 
+  message("The <data_frame> ", name, " was saved in the <dataset> ", 
           dataset, ".")
   # Return
   return(invisible(data_frame))

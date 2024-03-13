@@ -47,6 +47,30 @@
 }
 
 
+#' Substitutes pattern multiple times and prints output as code
+#'
+#' @param x character string containing pattern to be substituted
+#' @param pattern character pattern to be substituted
+#' @param replacement character vector of strings to use for substitution
+#' @param sep separator string between n outputs
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.cat_gsub_n <- function(x, pattern, replacement, sep = "\n\n") {
+  
+  for (i in replacement) {
+    
+    x %>% 
+      gsub(pattern, i, .) %>% 
+      cat(sep)
+    
+  }
+  
+}
+
+
 #' Prints function snippet to console and clipboard
 #'
 #' @param FUN function
@@ -186,3 +210,6 @@
   return(observations)
   
 }
+
+
+

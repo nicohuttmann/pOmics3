@@ -64,7 +64,7 @@ get_data_frame <- function(which,
     data <- data %>%
       dplyr::filter(observations %in% !!observations) %>%
       dplyr::select(c(observations, dplyr::any_of(variables))) %>%
-      .tibble2data_frame()
+      tibble2data_frame()
     
     # Matrix
   } else if (grepl(pattern = "matrix", x = output.type)) {
@@ -72,7 +72,7 @@ get_data_frame <- function(which,
     data <- data %>%
       dplyr::filter(observations %in% !!observations) %>%
       dplyr::select(c(observations, dplyr::any_of(variables))) %>%
-      .tibble2matrix()
+      tibble2matrix()
     
   } else {
     

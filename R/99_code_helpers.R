@@ -25,9 +25,9 @@
 #'
 .cat_character_named <- function(...) {
   
-  n <- paste0(names(...), ' = "', ..., '"')
+  n <- paste0(names(...), '" = "', ..., '"')
   
-  cat(paste0('c(', paste(n, collapse = ',\n\t'), ')'))
+  cat(paste0('c("', paste(n, collapse = ',\n\t"'), ')'))
   
 }
 
@@ -211,5 +211,54 @@
   
 }
 
+
+
+#' Title
+#'
+#' @param raw.data 
+#' @param variable.identifiers 
+#' @param variables.data 
+#' @param observations 
+#' @param data.frames 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.cat_import2new_dataset <- function(raw.data, 
+                                    variable.identifiers = "Protein.ID", 
+                                    variables.data = c("Entry.Name", 
+                                                       "Gene", 
+                                                       "Protein.Description", 
+                                                       "Protein", 
+                                                       "Unique.Peptides"), 
+                                    observations, 
+                                    data.frames = "channel") {
+  
+  
+  if (!hasArg(observations.names)) observations.names <- observations
+  
+  # Print output
+  cat(paste0(
+    'Datasets[["', raw.data, '"]] <- \n\t', 
+    "import2new_dataset(raw.data = Info$Imports$", raw.data, ",\n\t", 
+    "variable.identifiers = ", variable.identifiers, ",\n\t", 
+    
+    'variables.data = c("', 
+    paste(variables.data, collapse = '",\n\t"'),
+    '"),\n\t', 
+    
+    'observations = c("', 
+    paste(
+      paste0(names(observations), '" = "', observations, '"'), 
+      collapse = ',\n\t"'), 
+    '),\n\t', 
+    
+    'data.frames = c("', 
+    paste(data.frames, collapse = '",\n\t"'),
+    '"))\n\t'
+  ))
+  
+}
 
 

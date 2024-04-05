@@ -4,6 +4,7 @@
 #' @param dir directory to import files from
 #' @param ext specific file extensions to imports
 #' @param silent suppresses messages
+#' @param ... additional arguments to vroom function
 #'
 #' @importFrom magrittr %>% 
 #'
@@ -11,7 +12,7 @@
 #' @export
 #'
 #'
-import_files <- function(files, silent = F) {
+import_files <- function(files, silent = F, ...) {
   
   # Select files if no path given
   if (!hasArg(files) & !hasArg(dir)) {
@@ -32,9 +33,9 @@ import_files <- function(files, silent = F) {
     # Import data file
     if (silent) data <- suppressWarnings(
       suppressMessages(
-        vroom::vroom(file = files[i])))
+        vroom::vroom(file = files[i], ...)))
     
-    else data <- suppressWarnings(vroom::vroom(file = files[i]))
+    else data <- suppressWarnings(vroom::vroom(file = files[i], ...))
     
     
     # Rename columns to avoid spaces

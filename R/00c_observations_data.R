@@ -160,7 +160,7 @@ get_observations_data <- function(which,
         dplyr::filter(.data[["observations"]] %in% !!observations) %>%
         dplyr::arrange(match(.data[["observations"]], !!observations)) %>%
         dplyr::select("observations", !!which) %>%
-        .tibble2data_frame(from.row.names = "observations")
+        tibble2data_frame(from.row.names = "observations")
       
     # Vector 
     } else if (grepl(pattern = "vector", x = output.type)) {
@@ -197,7 +197,7 @@ get_observations_data <- function(which,
       dplyr::filter(.data[["observations"]] %in% !!observations) %>%
       dplyr::arrange(match(.data[["observations"]], !!observations)) %>%
       dplyr::select("observations", !!which) %>%
-      .tibble2data_frame(from.row.names = "observations")
+      tibble2data_frame(from.row.names = "observations")
     
   # Output type not found
   } else {

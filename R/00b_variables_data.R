@@ -136,7 +136,7 @@ get_variables_data <- function(which,
         dplyr::filter(.data[["variables"]] %in% !!variables) %>%
         dplyr::arrange(match(.data[["variables"]], !!variables)) %>%
         dplyr::select("variables", !!which) %>%
-        .tibble2data_frame(from.row.names = "variables")
+        tibble2data_frame(from.row.names = "variables")
       
       # Vector
     } else if (grepl(pattern = "vector", x = output.type)) {
@@ -174,7 +174,7 @@ get_variables_data <- function(which,
       dplyr::filter(.data[["variables"]] %in% !!variables) %>%
       dplyr::arrange(match(.data[["variables"]], !!variables)) %>%
       dplyr::select("variables", !!which) %>%
-      .tibble2data_frame(from.row.names = "variables")
+      tibble2data_frame(from.row.names = "variables")
     
     # Output type not found
   } else {

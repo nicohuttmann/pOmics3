@@ -4,12 +4,14 @@
 \alias{import_files}
 \title{Imports any file type using the file extension and returns list}
 \usage{
-import_files(files, silent = F)
+import_files(files, silent = F, ...)
 }
 \arguments{
 \item{files}{file paths}
 
 \item{silent}{suppresses messages}
+
+\item{...}{additional arguments to vroom function}
 
 \item{dir}{directory to import files from}
 

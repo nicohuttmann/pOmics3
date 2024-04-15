@@ -2,7 +2,8 @@
 % Please edit documentation in R/99_rmarkdown_functions.R
 \name{button_begin}
 \alias{button_begin}
-\title{Creates button to hide plots and tables}
+\title{Creates button to hide plots and tables
+based on https://getbootstrap.com/docs/4.0/components/collapse/}
 \usage{
 button_begin(label = "View/Hide")
 }
@@ -11,4 +12,5 @@ button_begin(label = "View/Hide")
 }
 \description{
 Creates button to hide plots and tables
+based on https://getbootstrap.com/docs/4.0/components/collapse/
 }

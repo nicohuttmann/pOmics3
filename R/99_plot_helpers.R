@@ -228,3 +228,54 @@
   
 }
 
+
+#' Title
+#'
+#' @param p 
+#' @param PCx 
+#' @param PCy 
+#' @param sdev 
+#' @param digits 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.set_PCA_labs <- function(p, PCx, PCy, sdev, digits = 1) {
+  
+  # Check input
+  if (!hasArg(p)) stop("No <p>lot argument given.")
+  
+  if (!hasArg(sdev)) {
+    sdev <- p[["data"]] %>% 
+      select(starts_with("PC")) %>% 
+      summarise(across(everything(), sd)) %>% 
+      c() %>% 
+      unlist()
+  }
+  
+  if (!hasArg(PCx)) PCx <- match(all.vars(p[["mapping"]][["x"]]), names(sdev))
+  
+  if (!hasArg(PCy)) PCy <- match(all.vars(p[["mapping"]][["y"]]), names(sdev))
+  
+  
+  # Add variances
+  p <- p + xlab(
+    paste0(
+      "PC", PCx, " (", 
+      round(
+        with(
+          list(x = sdev), 
+          x^2 / sum(x^2))[PCx] * 100, digits), "%)")) + 
+    ylab(
+      paste0(
+        "PC", PCy, " (", 
+        round(
+          with(list(x = sdev), 
+               x^2 / sum(x^2))[PCy] * 100, digits), "%)"))
+  
+  # Return 
+  return(p)
+  
+}
+

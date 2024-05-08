@@ -93,6 +93,14 @@ nice_number <- function(x,
 
 
 
+#' Title
+#'
+#' @param files 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 load_m <- function(files) {
   
   if (any(!file.exists(files))) 

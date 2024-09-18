@@ -235,6 +235,125 @@ import2new_dataset <- function(raw.data = NULL,
 }
 
 
+#' Title
+#'
+#' @param raw.data imported DIA-NN report file (.parquet or .tsv)
+#' @param variables.data column names from which to extract variables data
+#' @param observations vector declaring observation names (optionally named to 
+#'  rename observations)
+#' @param data.frames names (prefixes or suffixes) by which to identify data 
+#'  frames in the raw data sets
+#' @param proteotypic.only only use proteotypic precursors
+#' @param Q.Value precursor q-value threshold
+#' @param PG.Q.Value protein groups q-value threshold
+#' @param Lib.Q.Value match-between-runs precursor q-value threshold
+#' @param Lib.PG.Q.Value match-between-runs protein group q-value threshold
+#' @param protein.q protein q-value threshold
+#' @param gg.q gene group q-value threshold 
+#'
+#' @return
+#' @export
+#'
+#' 
+import2new_dataset_diann_precursor <- function(
+    raw.data = NULL, 
+    variables.data = character(), 
+    observations = character(), 
+    data.frames = "Precursor.Normalised", 
+    proteotypic.only = F, 
+    Q.Value = 1, 
+    PG.Q.Value = 1, 
+    Lib.Q.Value = 1, 
+    Lib.PG.Q.Value = 1, 
+    protein.q = 1, 
+    gg.q = 1) {
+  
+    # Check input
+    if (all(c(Q.Value, 
+              PG.Q.Value, 
+              Lib.Q.Value, 
+              Lib.PG.Q.Value, 
+              protein.q, 
+              gg.q) == 0)) 
+      stop("All your q-value cutoffs are 1, please change them according to your study.")
+    
+    # Filter precursor list
+    # Only proteotypic precursors
+    if (proteotypic.only) 
+      raw.data_filtered <- raw.data %>% 
+        filter(Proteotypic != 0)
+    # Q.Value = precursor q-value
+    # PG.Q.Value = protein group q-value
+    # Precursor.Normalised = Normalised precursor intensity
+    raw.data_filtered <- raw.data %>% 
+      filter(Q.Value <= Q.Value, 
+             PG.Q.Value <= PG.Q.Value, 
+             Lib.Q.Value <= Lib.Q.Value, 
+             Lib.PG.Q.Value <= Lib.PG.Q.Value, 
+             Precursor.Normalised > 0)
+    
+    # Variables data
+    variables_data_unique <- map(variables.data, 
+                                 \(x) length(unique(raw.data_filtered$Precursor.Id)) == 
+                                   length(unique(paste0(raw.data_filtered$Precursor.Id, 
+                                                        raw.data_filtered[[x]])))) %>% 
+      unlist()
+    
+    variables_data_frame <-  
+      tibble(Precursor.Id = unique(raw.data_filtered$Precursor.Id)) %>% 
+      left_join(raw.data_filtered %>% 
+                  dplyr::select(any_of(c("Precursor.Id", 
+                                         variables.data[variables_data_unique]))) %>% 
+                  group_by(Precursor.Id) %>% 
+                  summarise(across(everything(), \(x) paste(unique(x), collapse = ";"))), 
+                by = "Precursor.Id") %>% 
+      mutate(across(everything(), \(x) type.convert(x, 
+                                                    as.is = T, 
+                                                    numerals = "warn.loss"))) %>% 
+      dplyr::rename(variables = Precursor.Id)
+    
+    
+    
+    
+    # Make vector to rename observations
+    if (length(names(observations)) != length(observations) ||
+        any(names(observations) == ""))
+      observations_names <- observations %>% setNames(., .)
+    else
+      observations_names <- observations %>% setNames(names(.), .)
+    
+    
+    observations_data <- tibble(observations = unname(observations_names))
+    
+    data_frame_list <- list()
+    
+    for (i in data.frames) {
+      
+      data_frame_list[[i]] <- raw.data_filtered %>% 
+        dplyr::filter() %>% 
+        pivot_wider(id_cols = "Run", 
+                    names_from = "Precursor.Id", 
+                    values_from = all_of(i)) %>% 
+        transpose_tibble() %>% 
+        # filter(!if_any(everything(), is.na)) %>% 
+        rename(variables = rows) %>% 
+        transpose_tibble() %>% 
+        dplyr::mutate(observations = observations_names[observations]) %>% 
+        arrange(match(observations, unname(observations_names)))
+      
+    }
+    
+    
+    # Put dataset together
+    dataset <- new_dataset(variables_data_frame = variables_data_frame, 
+                           observations_data = observations_data, 
+                           data_frame_list = data_frame_list)
+    
+    return(dataset)
+    
+  }
+
+
 
 #' Checks and returns correct dataset identifier
 #'
@@ -285,6 +404,12 @@ get_dataset <- function(dataset) {
 #'
 #'
 get_dataset_names <- function() {
+  
+  # Check if Datasets list exist
+  if (!exists("Datasets")) 
+    stop("There must be a list named Datasets.", call. = FALSE)
+  
+  
   
   # Return
   return(names(Datasets))

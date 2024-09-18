@@ -25,6 +25,18 @@ tibble2matrix <- function(data) {
 }
 
 
+#' Transforms tibble to matrix
+#'
+#' @param data tibble
+#'
+#' @return
+#' @export
+#'
+#' @importFrom magrittr %>%
+#'
+t2m <- tibble2matrix
+
+
 #' Transforms tibble to data frame
 #'
 #' @param data tibble
@@ -47,6 +59,28 @@ tibble2data_frame <- function(data) {
   return(data)
   
 }
+
+
+#' Transforms tibble to data frame
+#'
+#' @param data tibble
+#'
+#' @return
+#' @export
+#'
+t2df <- tibble2data_frame
+
+
+#' Transforms tibble to matrix
+#'
+#' @param data tibble
+#'
+#' @return
+#' @export
+#'
+#' @importFrom magrittr %>%
+#'
+t2m <- tibble2matrix
 
 
 #' Transforms matrix to tibble and adds row names as first column 
@@ -76,6 +110,18 @@ matrix2tibble <- function(data, to.row.names = "rows") {
 }
 
 
+#' Transforms matrix to tibble and adds row names as first column 
+#'
+#' @param data matrix with row names
+#' @param to.row.names name for row names column
+#'
+#' @return
+#' @export
+#'
+#'
+m2t <- matrix2tibble
+
+
 #' Transforms data frames to tibble and adds column for row names
 #'
 #' @param data data frame with row names
@@ -97,6 +143,19 @@ data_frame2tibble <- function(data, to.row.names = "rows") {
   return(data)
   
 }
+
+
+#' Transforms data frames to tibble and adds column for row names
+#'
+#' @param data data frame with row names
+#' @param to.row.names name for row names column
+#'
+#' @return
+#' @export
+#'
+#' @importFrom magrittr %>%
+#'
+df2t <- data_frame2tibble
 
 
 #' Transforms any data type to a tibble
@@ -135,6 +194,18 @@ data2tibble <- function(data, to.row.names = "rows") {
 }
 
 
+#' Transforms any data type to a tibble
+#'
+#' @param data supported data types: matrix, data.frame
+#' @param to.row.names name for row names vector
+#'
+#' @return
+#' @export
+#'
+#'
+d2t <- data2tibble
+
+
 #' Transposes tibble and uses first column as column names
 #'
 #' @param data tibble
@@ -171,9 +242,24 @@ transpose_tibble <- function(data, to.row.names) {
 }
 
 
+#' Transposes tibble and uses first column as column names
+#'
+#' @param data tibble
+#' @param to.row.names row names column after transposing (if first column is 
+#'  "variables" or "observations", it will automatically assume the other)
+#'
+#' @return
+#' @export
+#'
+#' @importFrom magrittr %>%
+#'
+tt <- transpose_tibble
+
+
 #' Transforms a list to tibble logical indication for variables
 #'
 #' @param x list
+#' @param identifier column to be used as row names
 #'
 #' @return
 #' @export
@@ -193,6 +279,57 @@ list2logical_df <- function(x, identifier = "variables") {
   
   # Return
   return(df)
+  
+}
+
+
+#' Title
+#'
+#' @param x list of tibbles 
+#' @param by column to join and align
+#'
+#' @return
+#' @export
+#'
+#' 
+alignexp_tibble_rows <- function(x, by = NULL) {
+  
+  if (is.null(by)) by <- colnames(x[[1]])[1]
+  
+  x_joined <- tibble(!!by := x %>% 
+                       map(\(x) pull(x, by)) %>% 
+                       unlist() %>% 
+                       unique())
+  
+  for (i in seq_along(x)) {
+    x[[i]] <- left_join(x_joined, x[[i]], by = by)
+  }
+  
+  return(x)
+}
+
+
+#' Add objects by name to a list and (optionally) delete them 
+#'
+#' @param object.names names of objects to add to list 
+#' @param x list to assign objects to 
+#' @param rm.objects 
+#'
+#' @return
+#' @export
+#'
+#' 
+objects_to_list <- function(object.names, x = list(), rm.objects = T) {
+  
+  for (i in object.names) {
+    
+    x <- assign_in(x, i, eval(parse(text = i), envir = parent.frame()))
+    
+    if (rm.objects) rm(list = i, envir = parent.frame())
+    
+  }
+  
+  return(x)
   
 }
 

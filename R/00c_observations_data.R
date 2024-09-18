@@ -14,6 +14,17 @@ get_observations <- function(observations, dataset) {
   # check dataset
   dataset <- get_dataset(dataset)
   
+  # Check if observations data is already loaded
+  check_observations(dataset)
+  
+  ## Test slim datasets
+  # Load data if not done yet
+  if (is.function(Datasets[[dataset]][["Observations"]])) {
+    message("Loading observations data from parquet file.")
+    Datasets[[dataset]][["Observations"]] <<- 
+      Datasets[[dataset]][["Observations"]]()
+  }
+  
   # No observations specified
   # Return all
   if (!hasArg(observations)) {
@@ -97,6 +108,8 @@ get_observations_data <- function(which,
   # Check dataset
   dataset <- get_dataset(dataset = dataset)
   
+  # Check if observations data is already loaded
+  check_observations(dataset)
   
   ### Observations
   
@@ -160,7 +173,7 @@ get_observations_data <- function(which,
         dplyr::filter(.data[["observations"]] %in% !!observations) %>%
         dplyr::arrange(match(.data[["observations"]], !!observations)) %>%
         dplyr::select("observations", !!which) %>%
-        tibble2data_frame(from.row.names = "observations")
+        tibble2data_frame()
       
     # Vector 
     } else if (grepl(pattern = "vector", x = output.type)) {
@@ -197,7 +210,7 @@ get_observations_data <- function(which,
       dplyr::filter(.data[["observations"]] %in% !!observations) %>%
       dplyr::arrange(match(.data[["observations"]], !!observations)) %>%
       dplyr::select("observations", !!which) %>%
-      tibble2data_frame(from.row.names = "observations")
+      tibble2data_frame()
     
   # Output type not found
   } else {
@@ -229,6 +242,9 @@ get_observations_data_names <- function(dataset) {
   # Get dataset
   dataset <- get_dataset(dataset)
   
+  # Check if observations data is already loaded
+  check_observations(dataset)
+  
   observations_data_names <- names(Datasets[[dataset]][["Observations"]])
   
   return(observations_data_names)
@@ -240,7 +256,6 @@ get_observations_data_names <- function(dataset) {
 #'
 #' @param data data frame
 #' @param which observations data
-#' @param name name of new column (default = which)
 #' @param dataset dataset
 #'
 #' @return
@@ -250,15 +265,21 @@ get_observations_data_names <- function(dataset) {
 #'
 #'
 add_observations_data <- function(data,
-                                  which,
-                                  name,
+                                  which, 
                                   dataset) {
   
+  # return data if no variables data should be added
+  if (!hasArg(which)) return(data)
+  
   # Check input
-  if (!hasArg(name)) name <- which
+  if (length(names(which)) < length(which)) name <- which
+  else name <- names(which)
   
   # Check dataset
   dataset <- get_dataset(dataset)
+  
+  # Check if observations data is already loaded
+  check_observations(dataset)
   
   # Get observations from data frame
   observations <- dplyr::pull(data, var = "observations")
@@ -274,17 +295,16 @@ add_observations_data <- function(data,
     stop("Data does not contain all observations.")
   
   # Check name argument
-  if (!is.character(name) || name %in% names(data)) {
-    stop(paste0("<name> must be a string and cannot exist in the data.frame already."))
+  if (any(!is.character(name) | name %in% names(data))) {
+    stop(paste0("Names for new columns must be strings and cannot exist in the data already."))
   }
   
   
   # Add column
   data <- dplyr::right_join(observations_data, 
                             data, 
-                            by = "observations") %>% 
-    dplyr::rename_with(~ name, dplyr::all_of(which))
-  
+                            by = "observations")
+
   
   # Return
   return(data)
@@ -314,6 +334,9 @@ save_observations_data <- function(data_frame,
   
   # Check dataset
   dataset <- get_dataset(dataset)
+  
+  # Check if observations data is already loaded
+  check_observations(dataset)
   
   # Get template
   template <- Datasets[[dataset]][["Observations"]] %>%
@@ -363,14 +386,14 @@ save_observations_data <- function(data_frame,
     if (any(!Datasets[[dataset]][["Observations"]][["observations"]] %in% 
             data_frame[["observations"]])) 
       warning(paste0("Some observations in the <dataset> ", 
-                     dataset, " were not present in the data.\n"), 
+                     dataset, " were not present in the data."), 
               call. = FALSE)
     
     if (any(name %in% get_observations_data_names(dataset))) 
       warning("Following observations data names already exist in the ", 
               "<dataset> ", dataset, ": ", 
               paste(intersect(name, get_observations_data_names(dataset)), 
-                    collapse = ", "), ". Use a new <name>.\n", 
+                    collapse = ", "), ". Use a new <name>.", 
            call. = FALSE)
     
     if (length(column) != length(name)) 
@@ -401,7 +424,7 @@ save_observations_data <- function(data_frame,
     if (name %in% get_observations_data_names(dataset)) 
       warning(paste0("The <name> ", name, " already exists in the ", 
                      "observations of <dataset> ", 
-                     dataset, ". Maybe consider a new <name>.\n"), 
+                     dataset, ". Maybe consider a new <name>."), 
               call. = FALSE)
     
     # Check if data is named
@@ -416,7 +439,7 @@ save_observations_data <- function(data_frame,
       "<dataset> ", dataset, "."), call. = FALSE)
     if (any(!names(template) %in% names(data_frame))) 
       warning(paste0("Some observations in the <dataset> ", 
-                     dataset, " were not present in the data.\n"), call. = FALSE)
+                     dataset, " were not present in the data."), call. = FALSE)
     
     
     # Fill template with data

@@ -262,3 +262,38 @@
 }
 
 
+#' Define multiple mutate opereations by a formula and a corresponding data frame
+#'
+#' @param x tibble with column names to be replace by each row 
+#' @param formula formula as a string containing the column names to be replaced
+#' @param copy2clipboard copy the code to the clipboard
+#'
+#' @return
+#' @export
+#'
+#' 
+.cat_mutate_from_dataframe <- function(x, 
+                                       formula = "", 
+                                       copy2clipboard = T) {
+  output <- map(1:nrow(x), \(i) 
+                x %>% 
+                  filter(row_number() == i) %>% 
+                  c() %>% 
+                  unlist() %>% 
+                  str_replace_all(formula, .)) %>% 
+    unlist() %>% 
+    paste(., collapse = ',\n\t') %>% 
+    paste0('mutate(',
+           .,
+           ')')
+  
+  if (copy2clipboard) 
+    cat(output, 
+        file = "clipboard")
+  
+  cat(output)
+  
+  return(invisible(output))
+  
+}
+

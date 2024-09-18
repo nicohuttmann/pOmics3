@@ -1,10 +1,10 @@
-#' Assemble data from dataset and return in list
+#' Assemble data frame from dataset 
 #'
 #' @param which specific name of data type
 #' @param variables selected variables
 #' @param observations selected observations
 #' @param dataset dataset name 
-#' @param output.type data type (default = "tibble")
+#' @param output.type data type (default = "tibble", "data.frame", "matrix")
 #'
 #' @return
 #' @export
@@ -27,12 +27,6 @@ get_data_frame <- function(which,
     stop("Provide one data frame name with <which>.", call. = FALSE)
   }
   
-  # Check if data frame exists
-  if (!which %in% get_data_frame_names(dataset = dataset)) {
-    
-    stop("The data frame name <which> could not be found. Check for spelling ", 
-         "or if it has been extracted from the raw data.", call. = FALSE)
-  }
   
   # Checks correct name of dataset
   dataset <- get_dataset(dataset)
@@ -45,6 +39,9 @@ get_data_frame <- function(which,
   observations <- get_observations(observations = {{observations}},
                                    dataset = dataset)
   
+  
+  # Check if which exists and load data if not done yet
+  check_data_frame(which, dataset)
   
   
   # Grab data
@@ -137,7 +134,7 @@ save_data_frame <- function(data_frame,
   
   # Check data name
   if (name %in% get_data_frame_names(dataset)) 
-    warning("Data frame <name> already exists and will be overwritten.\n", 
+    warning("Data frame <name> already exists and will be overwritten.", 
             call. = FALSE)
   
   
@@ -176,3 +173,128 @@ save_data_frame <- function(data_frame,
   return(invisible(data_frame))
   
 }
+
+
+#' Assemble data frames from dataset and return as list
+#'
+#' @param which specific names of data type
+#' @param variables selected variables
+#' @param observations selected observations
+#' @param dataset dataset name 
+#' @param output.type data type (default = "tibble", "data.frame", "matrix")
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_data_frame_m <- function(which,
+                             variables,
+                             observations,
+                             dataset, 
+                             output.type = "tibble") {
+  
+  
+  # Default data name
+  if (!hasArg(which)) {
+    stop("Specify the data frame name with <which>.", call. = FALSE)
+  } else if (any(!is.character(which))) {
+    stop("Provide a character string as data frame name with <which>.", 
+         call. = FALSE)
+  }
+  
+  # Save each dataa frame in list
+  data_list <- list()
+  
+  # Save names
+  if (length(names(which)) == length(which)) {
+    which_names <- setNames(names(which), unname(which))
+    which <- unname(which)
+  } else {
+    which <- unname(which)
+    which_names <- setNames(unname(which), unname(which))
+  }
+  
+  for (which in which) {
+    
+    # Checks correct name of dataset
+    dataset <- get_dataset(dataset)
+    
+    # Check data frame 
+    check_data_frame(which, dataset)
+    
+    # Assemble variables
+    variables <- get_variables(variables = {{variables}},
+                               dataset = dataset)
+    
+    # Assemble observations
+    observations <- get_observations(observations = {{observations}},
+                                     dataset = dataset)
+    
+    
+    
+    # Grab data
+    data <- Datasets[[dataset]][["Data_frames"]][[which]]
+    
+    
+    # Tibble 
+    if (grepl(pattern = "tibble", x = output.type)) {
+      
+      data <- data %>%
+        dplyr::filter(observations %in% !!observations) %>%
+        dplyr::select(c(observations, dplyr::any_of(variables)))
+      
+      # Data frame
+    } else if (grepl(pattern = "data.frame", x = output.type)) {
+      
+      data <- data %>%
+        dplyr::filter(observations %in% !!observations) %>%
+        dplyr::select(c(observations, dplyr::any_of(variables))) %>%
+        tibble2data_frame()
+      
+      # Matrix
+    } else if (grepl(pattern = "matrix", x = output.type)) {
+      
+      data <- data %>%
+        dplyr::filter(observations %in% !!observations) %>%
+        dplyr::select(c(observations, dplyr::any_of(variables))) %>%
+        tibble2matrix()
+      
+    } else {
+      
+      stop("Data type <", output.type, 
+           "> is not supported. Use <tibble>, <data.frame> ",
+           "or <matrix> instead.", 
+           call. = FALSE)
+      
+    }
+    
+    data_list[[which]] <- data
+    
+  }
+  
+  # Check data
+  if (output.type == "tibble")
+    list_observations <- lapply(data_list, \(x) x %>% 
+                                  pull("observations"))
+  else 
+    list_observations <- lapply(data_list, rownames)
+  for (i in seq_along(list_observations)[-1]) {
+    if (any(list_observations[[1]] != list_observations[[i]]))
+      stop("The observations do not match.")
+  }
+  
+  # Check data
+  list_variables <- lapply(data_list, \(x) names(x))
+  for (i in seq_along(list_variables)[-1]) {
+    if (any(list_variables[[1]] != list_variables[[i]]))
+      stop("The variables do not match.")
+  }
+  
+  # Rename data frames
+  names(data_list) <- which_names[names(data_list)]
+  
+  # Return
+  return(data_list)
+  
+}
+

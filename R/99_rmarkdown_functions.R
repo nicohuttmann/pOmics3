@@ -174,3 +174,51 @@ load_m <- function(files) {
   }
   
 }
+
+
+# 
+#' Specific function for 00_Master script to fill Rmd template and add content
+#'
+#' @param name name of script and that should be replaced in the template file 
+#' @param dir directory of the template 
+#' @param dir.out output directory of the Rmd file 
+#' @param template name of the Rmd template 
+#' @param fill.pattern (optional) pattern to be replaced with existing Rmd 
+#' script specified by name
+#' @param output.name name of output Rmd file (defaults to gsub("00_template", 
+#' name, template))
+#'
+#' @return
+#' @export
+#'
+#' @examples
+template2Rmd_fill <- function(name, 
+                              dir = "Scripts", 
+                              dir.out, 
+                              template = "00_template.Rmd", 
+                              fill.pattern = "# Content", 
+                              output.name) {
+  
+  if (!hasArg(name)) 
+    stop("Please provide a name.")
+  
+  if (!hasArg(output.name))
+    output.name <- gsub("00_template", name, template)
+  
+  if (!hasArg(dir.out)) 
+    dir.out <- dir
+  
+  
+  text <- readLines(file.path(dir, template))
+  
+  text <- gsub("00_template", name, text)
+  
+  if (file.exists(file.path(dir, paste0(name, ".Rmd"))))
+    text <- gsub(fill.pattern, 
+                 paste(readLines(file.path(dir, paste0(name, ".Rmd"))), 
+                       collapse = "\n"), 
+                 text)
+  
+  cat(text, file = file.path(dir.out, output.name), sep = "\n")
+  
+}

@@ -4,14 +4,12 @@
 \alias{add_variables_data}
 \title{Add variables data to data frame}
 \usage{
-add_variables_data(data, which, name, dataset)
+add_variables_data(data, which, dataset)
 }
 \arguments{
 \item{data}{data frame}
 
 \item{which}{variables data}
-
-\item{name}{name of new column (default = which)}
 
 \item{dataset}{dataset}
 }

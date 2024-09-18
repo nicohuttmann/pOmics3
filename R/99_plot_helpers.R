@@ -279,3 +279,115 @@
   
 }
 
+
+#' ggplot2 'color' color palette based on EMBL colors from https://www.embl.org/guidelines/design/design-guidelines/colours/
+#'
+#' @param palette EMBL color palette
+#' @param sub vector to choose and order colors 
+#'
+#' @return
+#' @export
+#'
+#' 
+scale_color_embl <- function(palette = c("all", 
+                                         "decorative", 
+                                         "decorative_dark", 
+                                         "decorative_light", 
+                                         "primary", 
+                                         "secondary_neutral", 
+                                         "interactive", 
+                                         "ps"), 
+                             sub = c()) {
+  
+  
+  palette <- match.arg(palette)
+  
+  
+  
+  if (palette == "all") 
+    colors <- c("#18974C", 
+                "#3B6FB6", 
+                "#734595",
+                "#F49E17", 
+                "#F4C61F", 
+                "#A1BE1F", 
+                "#D41645")
+  else if (palette == "ps")
+    colors = c("#18974C", 
+               "#707372", 
+               "#0A5032", 
+               "#373A36", 
+               "#007B53", 
+               "#54585A", 
+               "#6CC24A", 
+               "#A8A99E", 
+               "#D0DEBB", 
+               "#D0D0CE")
+  else
+    stop("This is not an available palette.")
+  
+  
+  if (length(sub) > 0) 
+    colors <- colors[sub]
+  
+  
+  return(scale_color_manual(values = colors))
+  
+}
+
+
+
+#' #' ggplot2 'fill' color palette based on EMBL colors from https://www.embl.org/guidelines/design/design-guidelines/colours/
+#'
+#' @param palette EMBL color palette
+#' @param sub vector to choose and order colors 
+#'
+#' @return
+#' @export
+#'
+#' 
+scale_fill_embl <- function(palette = c("all", 
+                                        "decorative", 
+                                        "decorative_dark", 
+                                        "decorative_light", 
+                                        "primary", 
+                                        "secondary_neutral", 
+                                        "interactive", 
+                                        "ps"), 
+                            sub = c()) {
+  
+  palette <- match.arg(palette)
+  
+  
+  
+  if (palette == "all") 
+    colors <- c("#18974C", 
+                "#3B6FB6", 
+                "#734595",
+                "#F49E17", 
+                "#F4C61F", 
+                "#A1BE1F", 
+                "#D41645")
+  else if (palette == "ps")
+    colors = c("#18974C", 
+               "#707372", 
+               "#0A5032", 
+               "#373A36", 
+               "#007B53", 
+               "#54585A", 
+               "#6CC24A", 
+               "#A8A99E", 
+               "#D0DEBB", 
+               "#D0D0CE")
+  else
+    stop("This is not an available palette.")
+  
+  
+  if (length(sub) > 0) 
+    colors <- colors[sub]
+  
+  
+  return(scale_fill_manual(values = colors))
+  
+}
+

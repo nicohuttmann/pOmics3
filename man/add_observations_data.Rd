@@ -4,14 +4,12 @@
 \alias{add_observations_data}
 \title{Add observations data to data frame}
 \usage{
-add_observations_data(data, which, name, dataset)
+add_observations_data(data, which, dataset)
 }
 \arguments{
 \item{data}{data frame}
 
 \item{which}{observations data}
-
-\item{name}{name of new column (default = which)}
 
 \item{dataset}{dataset}
 }

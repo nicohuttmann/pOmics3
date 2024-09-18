@@ -14,6 +14,9 @@ get_variables <- function(variables, dataset) {
   # Check dataset
   dataset <- get_dataset(dataset)
   
+  # Check if variables data is already loaded
+  check_variables(dataset)
+  
   # No variables specified
   if (!hasArg(variables)) {
     variables_output <- Datasets[[dataset]][["Variables"]] %>%
@@ -69,6 +72,8 @@ get_variables_data <- function(which,
   # Check dataset
   dataset <- get_dataset(dataset = dataset)
   
+  # Check if variables data is already loaded
+  check_variables(dataset)
   
   ### Variables
   
@@ -136,7 +141,7 @@ get_variables_data <- function(which,
         dplyr::filter(.data[["variables"]] %in% !!variables) %>%
         dplyr::arrange(match(.data[["variables"]], !!variables)) %>%
         dplyr::select("variables", !!which) %>%
-        tibble2data_frame(from.row.names = "variables")
+        tibble2data_frame()
       
       # Vector
     } else if (grepl(pattern = "vector", x = output.type)) {
@@ -174,7 +179,7 @@ get_variables_data <- function(which,
       dplyr::filter(.data[["variables"]] %in% !!variables) %>%
       dplyr::arrange(match(.data[["variables"]], !!variables)) %>%
       dplyr::select("variables", !!which) %>%
-      tibble2data_frame(from.row.names = "variables")
+      tibble2data_frame()
     
     # Output type not found
   } else {
@@ -205,6 +210,9 @@ get_variables_data_names <- function(dataset) {
   # Get dataset name
   dataset <- get_dataset(dataset)
   
+  # Check if variables data is already loaded
+  check_variables(dataset)
+  
   variables_data_names <- names(Datasets[[dataset]][["Variables"]])
   
   return(variables_data_names)
@@ -216,7 +224,6 @@ get_variables_data_names <- function(dataset) {
 #'
 #' @param data data frame
 #' @param which variables data
-#' @param name name of new column (default = which)
 #' @param dataset dataset
 #'
 #' @return
@@ -227,14 +234,20 @@ get_variables_data_names <- function(dataset) {
 #'
 add_variables_data <- function(data,
                                which,
-                               name,
                                dataset) {
   
+  # return data if no variables data should be added
+  if (!hasArg(which)) return(data)
+  
   # Check input
-  if (!hasArg(name)) name <- which
+  if (length(names(which)) < length(which)) name <- which
+  else name <- names(which)
   
   # Check dataset
   dataset <- get_dataset(dataset)
+  
+  # Check if variables data is already loaded
+  check_variables(dataset)
   
   # Get variables from data frame
   variables <- dplyr::pull(data, var = "variables")
@@ -250,16 +263,13 @@ add_variables_data <- function(data,
     stop("Data does not contain all variables.")
   
   # Check name argument
-  if (!is.character(name) || name %in% names(data)) {
-    stop(paste0("<name> must be a string and cannot exist in the data.frame already."))
+  if (any(!is.character(name) | name %in% names(data))) {
+    stop(paste0("Names for new columns must be strings and cannot exist in the data already."))
   }
   
   
   # Add column
-  data <- dplyr::right_join(variables_data, 
-                            data, 
-                            by = "variables") %>% 
-    dplyr::rename_with(~ name, dplyr::all_of(which))
+  data <- dplyr::right_join(variables_data, data, by = "variables")
   
   
   # Return
@@ -290,6 +300,9 @@ save_variables_data <- function(data_frame,
   
   # Check dataset
   dataset <- get_dataset(dataset)
+  
+  # Check if variables data is already loaded
+  check_variables(dataset)
   
   # Get template
   template <- Datasets[[dataset]][["Variables"]] %>%
@@ -338,13 +351,13 @@ save_variables_data <- function(data_frame,
     if (any(!Datasets[[dataset]][["Variables"]][["variables"]] %in% 
             data_frame[["variables"]])) 
       warning("Some variables in the <dataset> ", 
-              dataset, " were not present in the data.\n", call. = FALSE)
+              dataset, " were not present in the data.", call. = FALSE)
     
     if (any(name %in% get_variables_data_names(dataset)))
       warning("Following variables data names already exist in the <dataset> ", 
               dataset, ": ", 
               paste(intersect(name, get_variables_data_names(dataset)), 
-                    collapse = ", "), ". Use a new <name>.\n", 
+                    collapse = ", "), ". Use a new <name>.", 
               call. = FALSE)
     
     if (length(column) != length(name)) 
@@ -373,7 +386,7 @@ save_variables_data <- function(data_frame,
     # Check new name
     if (name %in% get_variables_data_names(dataset)) 
       warning(paste0("Name of new variables data already exists in the <dataset> ", 
-                     dataset, ". Use a new <name>.\n"), 
+                     dataset, ". Use a new <name>."), 
               call. = FALSE)
     
     # Check if data is named
@@ -390,7 +403,7 @@ save_variables_data <- function(data_frame,
                   dataset, "."), call. = FALSE)
     if (any(!names(template) %in% names(data_frame))) 
       warning("Some variables in the <dataset> ", dataset, 
-              " were not present in the data.\n", 
+              " were not present in the data.", 
               call. = FALSE)
     
     

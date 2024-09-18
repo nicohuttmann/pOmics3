@@ -8,6 +8,8 @@ list2logical_df(x, identifier = "variables")
 }
 \arguments{
 \item{x}{list}
+
+\item{identifier}{column to be used as row names}
 }
 \description{
 Transforms a list to tibble logical indication for variables

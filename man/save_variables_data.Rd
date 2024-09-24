@@ -4,14 +4,12 @@
 \alias{save_variables_data}
 \title{Add data to variables data frame}
 \usage{
-save_variables_data(data_frame, column, name, dataset, fill = NA)
+save_variables_data(data_frame, column, dataset, fill = NA)
 }
 \arguments{
 \item{data_frame}{variables data as tibble or named vector}
 
 \item{column}{column names to save}
-
-\item{name}{name}
 
 \item{dataset}{dataset}
 

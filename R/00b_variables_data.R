@@ -282,7 +282,6 @@ add_variables_data <- function(data,
 #'
 #' @param data_frame variables data as tibble or named vector
 #' @param column column names to save
-#' @param name name
 #' @param dataset dataset
 #' @param fill value to fill non-existing variables with
 #'
@@ -294,7 +293,6 @@ add_variables_data <- function(data,
 #'
 save_variables_data <- function(data_frame,
                                 column, 
-                                name,
                                 dataset, 
                                 fill = NA) {
   
@@ -315,14 +313,18 @@ save_variables_data <- function(data_frame,
   # Check data input
   if (!hasArg(data_frame)) stop("No data given.", call. = FALSE)
   
+  # Check data input
+  if (!hasArg(column)) stop("No columns specified.", call. = FALSE)
+  
+  
   # Check data name
-  if (!hasArg(name)) {
-    if (hasArg(column)) {
-      name <- column
-    } else {
-      stop("Please provide a <name> for the new variables data.", 
-           call. = FALSE)
-    }
+  if (is.null(names(column))) {
+    name <- column
+  } else if (length(setdiff(names(column), "")) != length(column)) {
+    name <- column
+    name[names(column) != ""] <- names(column)[names(column) != ""]
+  } else {
+    name <- names(column)
   }
   
   

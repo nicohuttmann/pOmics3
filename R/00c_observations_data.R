@@ -37,7 +37,7 @@ get_observations <- function(observations, dataset) {
   
   # Check if input is vector
   is_vector_input <- tryCatch(is.atomic(observations),
-                           error = function(cond) FALSE)
+                              error = function(cond) FALSE)
   
   # if observations input expression
   if (!is_vector_input) {
@@ -68,16 +68,16 @@ get_observations <- function(observations, dataset) {
         intersect(observations, observations_all)
       
       return(observations_output)
-    # Some specified observations match the existing ones
+      # Some specified observations match the existing ones
     } else if (any(observations %in% observations_all)) {
       
       stop("Not all specified <observations> were found in the observations ", 
-      "table.", 
+           "table.", 
            call. = FALSE)
       
     } else {
       stop("None of the specified observations were found in the ", 
-      "observations table. Try using a tidy-friendly expression.", 
+           "observations table. Try using a tidy-friendly expression.", 
            call. = FALSE)
     }
     
@@ -175,7 +175,7 @@ get_observations_data <- function(which,
         dplyr::select("observations", !!which) %>%
         tibble2data_frame()
       
-    # Vector 
+      # Vector 
     } else if (grepl(pattern = "vector", x = output.type)) {
       
       data <- Datasets[[dataset]][["Observations"]] %>%
@@ -184,7 +184,7 @@ get_observations_data <- function(which,
         dplyr::pull(var = !!dplyr::enquo(which), name = "observations")
       
       
-    # List
+      # List
     } else if (regexpr(pattern = "list", text = output.type) == 1) {
       
       data <- Datasets[[dataset]][["Observations"]] %>%
@@ -195,7 +195,7 @@ get_observations_data <- function(which,
       
     } 
     
-  # Multiple observations data names
+    # Multiple observations data names
   } else if (grepl(pattern = "tibble", x = output.type)) {
     
     data <- Datasets[[dataset]][["Observations"]] %>%
@@ -212,7 +212,7 @@ get_observations_data <- function(which,
       dplyr::select("observations", !!which) %>%
       tibble2data_frame()
     
-  # Output type not found
+    # Output type not found
   } else {
     
     stop(paste0("Output type <",
@@ -304,7 +304,7 @@ add_observations_data <- function(data,
   data <- dplyr::right_join(observations_data, 
                             data, 
                             by = "observations")
-
+  
   
   # Return
   return(data)
@@ -316,7 +316,6 @@ add_observations_data <- function(data,
 #'
 #' @param data_frame observations data as tibble or named vector
 #' @param column column names to save
-#' @param name name
 #' @param dataset dataset
 #' @param fill value to fill non-existing observations with
 #'
@@ -328,7 +327,6 @@ add_observations_data <- function(data,
 #'
 save_observations_data <- function(data_frame,
                                    column,
-                                   name,
                                    dataset, 
                                    fill = NA) {
   
@@ -349,16 +347,20 @@ save_observations_data <- function(data_frame,
   # Check data input
   if (!hasArg(data_frame)) stop("No data given.", call. = FALSE)
   
+  # Check data input
+  if (!hasArg(column)) stop("No columns specified.", call. = FALSE)
+  
+  
   # Check data name
-  if (!hasArg(name)) {
-    if (hasArg(column)) {
-      name <- column
-    } else {
-      stop("Please provide a <name> for the new observations data.", 
-         call. = FALSE)
-    }
+  if (is.null(names(column))) {
+    name <- column
+  } else if (length(setdiff(names(column), "")) != length(column)) {
+    name <- column
+    name[names(column) != ""] <- names(column)[names(column) != ""]
+  } else {
+    name <- names(column)
   }
-    
+  
   
   # Check if given data is tibble or vector
   if (tibble::is_tibble(data_frame)) {
@@ -374,7 +376,7 @@ save_observations_data <- function(data_frame,
     
     if (any(!column %in% names(data_frame))) 
       stop("Following column names were not found in the data: ", 
-                  paste(setdiff(column, names(data_frame)), collapse = ", "), 
+           paste(setdiff(column, names(data_frame)), collapse = ", "), 
            call. = FALSE)
     
     if (any(!data_frame[["observations"]] %in% 
@@ -394,7 +396,7 @@ save_observations_data <- function(data_frame,
               "<dataset> ", dataset, ": ", 
               paste(intersect(name, get_observations_data_names(dataset)), 
                     collapse = ", "), ". Use a new <name>.", 
-           call. = FALSE)
+              call. = FALSE)
     
     if (length(column) != length(name)) 
       stop("Please provide one name for each column specified.", 
@@ -433,10 +435,10 @@ save_observations_data <- function(data_frame,
     # Check if names exist in observations
     if (all(!names(data_frame) %in% names(template)))
       stop(paste0("None of the observations in the data were found in the ", 
-      "<dataset> ", dataset, "."), call. = FALSE)
+                  "<dataset> ", dataset, "."), call. = FALSE)
     if (any(!names(data_frame) %in% names(template)))
       stop(paste0("The data contains observations that do not exist in the ", 
-      "<dataset> ", dataset, "."), call. = FALSE)
+                  "<dataset> ", dataset, "."), call. = FALSE)
     if (any(!names(template) %in% names(data_frame))) 
       warning(paste0("Some observations in the <dataset> ", 
                      dataset, " were not present in the data."), call. = FALSE)

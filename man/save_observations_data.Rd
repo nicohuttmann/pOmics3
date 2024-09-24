@@ -4,14 +4,12 @@
 \alias{save_observations_data}
 \title{Adds data to observations data frame}
 \usage{
-save_observations_data(data_frame, column, name, dataset, fill = NA)
+save_observations_data(data_frame, column, dataset, fill = NA)
 }
 \arguments{
 \item{data_frame}{observations data as tibble or named vector}
 
 \item{column}{column names to save}
-
-\item{name}{name}
 
 \item{dataset}{dataset}
 

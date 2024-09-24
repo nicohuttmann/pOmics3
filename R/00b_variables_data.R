@@ -327,6 +327,8 @@ save_variables_data <- function(data_frame,
     name <- names(column)
   }
   
+  names(column) <- name
+  
   
   # Check if given data is tibble or vector
   if (tibble::is_tibble(data_frame)) {
@@ -371,8 +373,7 @@ save_variables_data <- function(data_frame,
       Datasets[[dataset]][["Variables"]] %>% 
       dplyr::select(-dplyr::any_of(name)) %>% 
       dplyr::left_join(y = data_frame %>% 
-                         dplyr::select(dplyr::all_of(c("variables", column))) %>% 
-                         dplyr::rename(all_of(setNames(column, name))), 
+                         dplyr::select(dplyr::all_of(c("variables", column))), 
                        by = "variables")
     
     # Completion message

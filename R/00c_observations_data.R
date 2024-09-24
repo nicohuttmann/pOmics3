@@ -361,6 +361,8 @@ save_observations_data <- function(data_frame,
     name <- names(column)
   }
   
+  names(column) <- name
+  
   
   # Check if given data is tibble or vector
   if (tibble::is_tibble(data_frame)) {
@@ -408,8 +410,7 @@ save_observations_data <- function(data_frame,
       dplyr::select(-dplyr::any_of(name)) %>% 
       dplyr::left_join(y = data_frame %>% 
                          dplyr::select(dplyr::all_of(c("observations", 
-                                                       column))) %>% 
-                         dplyr::rename(all_of(setNames(column, name))), 
+                                                       column))), 
                        by = "observations")
     
     # Completion message

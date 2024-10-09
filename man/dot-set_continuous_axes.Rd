@@ -13,6 +13,7 @@
   aspect.ratio = 1,
   plot.center = NULL,
   axis.unit.ratio = NULL,
+  coord_fun = coord_fixed,
   expand.x.axis = c(0, 0),
   expand.y.axis = c(0, 0)
 )

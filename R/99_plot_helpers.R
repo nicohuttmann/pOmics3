@@ -101,6 +101,7 @@
                                  aspect.ratio = 1,
                                  plot.center = NULL,
                                  axis.unit.ratio = NULL,
+                                 coord_fun = coord_fixed, 
                                  expand.x.axis = c(0, 0),
                                  expand.y.axis = c(0, 0)) {
   
@@ -165,9 +166,11 @@
       scale_y_continuous(limits = unlist(plot_limits[3:4]),
                          breaks = .axis_limit_breaks(plot.limits = unlist(plot_limits[3:4]),
                                                      break.size = y.axis.breaks)$breaks,
-                         expand = expand.y.axis) +
+                         expand = expand.y.axis) #+
       #
-      coord_fixed(ratio = axis.unit.ratio)
+    if (any(str_detect(deparse(args(coord_fun)), "ratio")))
+      p <- p + coord_fun(ratio = axis.unit.ratio)
+      #coord_fun(ratio = axis.unit.ratio)
     
     # Given axis.unit.ratio
   } else if (!is.null(axis.unit.ratio)) {
@@ -200,9 +203,11 @@
       scale_y_continuous(limits = unlist(plot_limits[3:4]),
                          breaks = .axis_limit_breaks(plot.limits = unlist(plot_limits[3:4]),
                                                      break.size = y.axis.breaks)$breaks,
-                         expand = expand.y.axis) +
+                         expand = expand.y.axis) #+
       #
-      coord_fixed(ratio = axis.unit.ratio)
+    if (any(str_detect(deparse(args(coord_fun)), "ratio")))
+      p <- p + coord_fun(ratio = axis.unit.ratio)
+    #coord_fun(ratio = axis.unit.ratio)
     
     
   } else {
@@ -223,8 +228,83 @@
                          expand = expand.y.axis)
   }
   
+  
   # Return
   return(p)
+  
+}
+
+
+
+#' Align axis limits of a list of plots 
+#'
+#' @param list_p list of ggplot objects 
+#' @param x.symmetric set x axis limits to absolute max 
+#' @param adjust.x.limits function or list containing two functions 
+#' to be applied to the existing x-axis limits
+#' @param adjust.y.limits function or list containing two functions 
+#' to be applied to the existing y-axis limits 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.align_axes_limits <- function(list_p, 
+                               x.symmetric = F, 
+                               adjust.x.limits = \(x) x, 
+                               adjust.y.limits = \(y) y, 
+                               ...) {
+  
+  limits <- map(list_p, .get_plot_limits) %>% 
+    map(as_tibble) %>% 
+    bind_rows() %>% 
+    summarise(xmin = min(xmin), 
+              xmax = max(xmax), 
+              ymin = min(ymin), 
+              ymax = max(ymax))
+  
+  if (x.symmetric) 
+    limits <- limits %>% 
+      mutate(xmin = -max(abs(c(xmin, xmax))), 
+             xmax = -xmin)
+  
+  # Adjust x limits
+  if (length(adjust.x.limits) == 2) 
+    limits <- limits %>% 
+      mutate(xmin = adjust.x.limits[[1]](xmin), 
+             xmax = adjust.x.limits[[2]](xmax))
+  else 
+    limits <- limits %>% 
+      mutate(xmin = adjust.x.limits(xmin), 
+             xmax = adjust.x.limits(xmax))
+  
+  # Adjust y limits 
+  if (length(adjust.y.limits) == 2) 
+    limits <- limits %>% 
+      mutate(ymin = adjust.y.limits[[1]](ymin), 
+             ymax = adjust.y.limits[[2]](ymax))
+  else 
+    limits <- limits %>% 
+      mutate(ymin = adjust.y.limits(ymin), 
+             ymax = adjust.y.limits(ymax))
+  
+  
+  list_p_aligned <- map(
+    list_p, 
+    \(x) .set_continuous_axes(p = x, 
+                              x.axis.limits = unlist(limits[c("xmin", "xmax")]), 
+                              y.axis.limits = unlist(limits[c("ymin", "ymax")]), 
+                              ...
+                              # x.axis.breaks = NULL, 
+                              # y.axis.breaks = NULL, 
+                              # aspect.ratio = 1, 
+                              # plot.center = NULL, 
+                              # axis.unit.ratio = NULL, 
+                              # expand.x.axis = c(0, 0), 
+                              # expand.y.axis = c(0, 0)
+    ))
+  
+  return(list_p_aligned)
   
 }
 

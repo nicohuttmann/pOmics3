@@ -49,3 +49,33 @@ normalizeBetweenArrays_subset <- function(object,
 }
 
 
+#' limma's normalizeBetweenArrays method for regular tibble with variables as 
+#' columns 
+#'
+#' @param object 
+#' @param method 
+#' @param targets 
+#' @param cyclic.method 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' 
+limma_normalizeBetweenArrays <- function(object, 
+                                         method = "scale", 
+                                         targets = NULL, 
+                                         cyclic.method = "fast", 
+                                         ...) {
+  object %>% 
+    transpose_tibble() %>% 
+    tibble2matrix() %>% 
+    limma::normalizeBetweenArrays(method = method, 
+                                  targets = targets, 
+                                  cyclic.method = cyclic.method, 
+                                  ...) %>% 
+    matrix2tibble("variables") %>% 
+    transpose_tibble()
+}
+
+

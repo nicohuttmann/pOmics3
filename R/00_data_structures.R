@@ -31,11 +31,21 @@ import_files <- function(files, silent = F, ...) {
   for (i in seq_along(files)) {
     
     # Import data file
-    if (silent) data <- suppressWarnings(
-      suppressMessages(
-        vroom::vroom(file = files[i], ...)))
+    if (silent) {
+      if (tools::file_ext(files[i]) == "parquet")
+        data <- arrow::read_parquet(file = files[i], ...)
+      else
+        data <- suppressWarnings(
+          suppressMessages(
+            vroom::vroom(file = files[i], ...)))
+    }
     
-    else data <- suppressWarnings(vroom::vroom(file = files[i], ...))
+    else {
+      if (tools::file_ext(files[i]) == "parquet")
+        data <- arrow::read_parquet(file = files[i], ...)
+      else
+        data <- suppressWarnings(vroom::vroom(file = files[i], ...))
+    }
     
     
     # Rename columns to avoid spaces
@@ -136,9 +146,9 @@ cleanup <- function(global = T, exclude = c(), imports = T) {
   
   if (global) 
     rm(list = setdiff(objects(name = globalenv()), c("Analysis",
-                                   "Datasets",
-                                   "Info", 
-                                   exclude)), 
+                                                     "Datasets",
+                                                     "Info", 
+                                                     exclude)), 
        pos = globalenv())
   
   

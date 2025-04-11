@@ -8,20 +8,20 @@
 #' @export
 #'
 #' @examples
-fgsea_fgseaMultilevel <- function(pathways, 
-                                  stats, 
-                                  sampleSize = 101, 
-                                  minSize = 1, 
-                                  maxSize = length(stats) - 1, 
-                                  eps = 1e-50, 
-                                  scoreType = c("std", "pos", "neg"), 
-                                  nproc = 0, 
-                                  gseaParam = 1, 
-                                  BPPARAM = NULL, 
-                                  nPermSimple = 1000, 
-                                  absEps = NULL, 
-                                  silent = T, 
-                                  seed = 42) {
+fgsea_fgseaMl <- function(stats, 
+                          pathways, 
+                          sampleSize = 101, 
+                          minSize = 1, 
+                          maxSize = length(stats) - 1, 
+                          eps = 1e-50, 
+                          scoreType = c("std", "pos", "neg"), 
+                          nproc = 0, 
+                          gseaParam = 1, 
+                          BPPARAM = NULL, 
+                          nPermSimple = 1000, 
+                          absEps = NULL, 
+                          silent = T, 
+                          seed = 42) {
   
   # Set seed for reproducible results
   set.seed(seed)

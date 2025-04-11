@@ -273,5 +273,3 @@ thicc_datasets <- function() {
   thicc_observations_data()
 }
 
-
-

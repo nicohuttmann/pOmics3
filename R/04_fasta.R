@@ -25,10 +25,10 @@ mutate_sequence_position <- function(x,
   names(fasta) <- unlist(lapply(strsplit(x = names(fasta), "\\|"), \(x) x[2]))
   
   x_pos <- x %>% 
-    mutate(Sequence = fasta[strsplit_keep_first(Protein.Group, ";")], 
-           Start = str_locate(Sequence, Stripped.Sequence)[, "start"], 
-           End = str_locate(Sequence, Stripped.Sequence)[, "end"], 
-           Length = nchar(Stripped.Sequence))
+    dplyr::mutate(Sequence = fasta[strsplit_keep_first(Protein.Group, ";")], 
+                  Start = str_locate(Sequence, Stripped.Sequence)[, "start"], 
+                  End = str_locate(Sequence, Stripped.Sequence)[, "end"], 
+                  Length = nchar(Stripped.Sequence))
   
   return(x_pos)
   

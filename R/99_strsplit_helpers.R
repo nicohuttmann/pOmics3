@@ -41,7 +41,7 @@ strsplit_ <- function(x, split, vector.output = T, as_numeric = F) {
   # Coerce to numeric if possible
   if (as_numeric &&
       !any(unlist(suppressWarnings(
-        lapply(x, function(x) is.na(as.numeric(x))))))) {
+        lapply(x, function(x) any(is.na(as.numeric(x[!is.na(x)])))))))) {
     x_split <- lapply(x, as.numeric)
   }
   

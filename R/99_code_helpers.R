@@ -323,3 +323,45 @@ cc <- function(...) {
   setNames(c(...), c(...))
 }
 
+
+#' Remove objects from the global environment and the Imports list
+#'
+#' @param global should the global environment be cleaned 
+#' @param exclude which objects not to remove
+#' @param imports should the imported data frames be removed
+#'
+#' @return
+#' @export
+#'
+#' 
+cleanup <- function(global = T, exclude = c(), imports = T) {
+  
+  if (imports) 
+    Info$Imports <<- list()
+  
+  if (global) 
+    rm(list = setdiff(objects(name = globalenv()), c("Analysis",
+                                                     "Datasets",
+                                                     "Info", 
+                                                     exclude)), 
+       pos = globalenv())
+  
+  
+  
+  return(invisible("Good job."))
+}
+
+
+#' Garbage collection function ruthlessly copied from https://stackoverflow.com/a/1467334
+#'
+#' @param n number of gc() iterations 
+#'
+#' @returns
+#' @export
+#'
+#' 
+cleanMem <- function(n = 10) { 
+  for (i in 1:n) 
+    gc() 
+}
+

@@ -1,7 +1,7 @@
 #' NGLVieweR function which accepts protein accession IDs and downloads given 
 #' protein structure from the Alphafold database
 #'
-#' @param id 
+#' @param id UniProt accession id 
 #'
 #' @returns
 #' @export

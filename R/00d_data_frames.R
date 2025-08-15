@@ -182,6 +182,10 @@ save_data_frame <- function(data_frame,
 #' @param observations selected observations
 #' @param dataset dataset name 
 #' @param output.type data type (default = "tibble", "data.frame", "matrix")
+#' @param match_variables Check if variables column names match between data 
+#' frames 
+#' @param match_observations Check if observations column matches between data 
+#' frames 
 #'
 #' @return
 #' @export
@@ -191,7 +195,9 @@ get_data_frame_m <- function(which,
                              variables,
                              observations,
                              dataset, 
-                             output.type = "tibble") {
+                             output.type = "tibble", 
+                             match_variables = T, 
+                             match_observations = T) {
   
   
   # Default data name
@@ -273,21 +279,28 @@ get_data_frame_m <- function(which,
   }
   
   # Check data
-  if (output.type == "tibble")
-    list_observations <- lapply(data_list, \(x) x %>% 
-                                  pull("observations"))
-  else 
-    list_observations <- lapply(data_list, rownames)
-  for (i in seq_along(list_observations)[-1]) {
-    if (any(list_observations[[1]] != list_observations[[i]]))
-      stop("The observations do not match.")
+  
+  # Check matching observations 
+  if (match_observations) {
+    if (output.type == "tibble")
+      list_observations <- lapply(data_list, \(x) x %>% 
+                                    pull("observations"))
+    else 
+      list_observations <- lapply(data_list, rownames)
+    
+    for (i in seq_along(list_observations)[-1]) {
+      if (any(list_observations[[1]] != list_observations[[i]]))
+        stop("The observations do not match.")
+    }
   }
   
-  # Check data
-  list_variables <- lapply(data_list, \(x) names(x))
-  for (i in seq_along(list_variables)[-1]) {
-    if (any(list_variables[[1]] != list_variables[[i]]))
-      stop("The variables do not match.")
+  # Check matching observations 
+  if (match_variables) {
+    list_variables <- lapply(data_list, \(x) names(x))
+    for (i in seq_along(list_variables)[-1]) {
+      if (any(list_variables[[1]] != list_variables[[i]]))
+        stop("The variables do not match.")
+    }
   }
   
   # Rename data frames

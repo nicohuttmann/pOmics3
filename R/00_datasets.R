@@ -296,6 +296,7 @@ import2new_dataset <- function(raw.data = NULL,
          "different column can be declared or several columns combined.", 
          call. = FALSE)
   
+  
   # Begin building variables.data frame with variable ids                     
   variables_data_frame <- tibble::tibble(variables = as.character(variable.ids))
   
@@ -384,6 +385,138 @@ import2new_dataset <- function(raw.data = NULL,
     }
     
   }
+  
+  # Put dataset together
+  dataset <- new_dataset(variables_data_frame = variables_data_frame, 
+                         observations_data = observations_data, 
+                         data_frame_list = data_frame_list)
+  
+  return(dataset)
+  
+}
+
+
+#' Title
+#'
+#' @param raw.data imported DIA-NN report file (.parquet or .tsv)
+#' @param variable.identifiers tidy expression to declare variable identifiers
+#' @param variables.data column names from which to extract variables data
+#' @param observations vector declaring observation names (optionally named to 
+#'  rename observations)
+#' @param data.frames names (prefixes or suffixes) by which to identify data 
+#'  frames in the raw data sets
+#' @param proteotypic.only only use proteotypic precursors
+#' @param Q.Value precursor q-value threshold
+#' @param PG.Q.Value protein groups q-value threshold
+#' @param Lib.Q.Value match-between-runs precursor q-value threshold
+#' @param Lib.PG.Q.Value match-between-runs protein group q-value threshold
+#' @param protein.q protein q-value threshold
+#' @param gg.q gene group q-value threshold 
+#'
+#' @return
+#' @export
+#'
+#' 
+import2new_dataset_long <- function(
+    raw.data = NULL, 
+    variable.identifiers, 
+    variables.data = character(), 
+    observations = character(), 
+    data.frames = "Precursor.Normalised", 
+    filter.by) {
+  
+  # Check input
+  if (is.null(raw.data)) 
+    stop("No data provided.")
+  
+  # Filter precursor list
+  if (hasArg(filter.by)) 
+    raw.data_filtered <- raw.data %>% 
+      dplyr::filter(!!dplyr::enquo(filter.by))
+  else 
+    raw.data_filtered <- raw.data 
+  
+  
+  # Identifiers
+  if (!missing(variable.identifiers)) {
+    
+    # Check if identifiers can be made from input
+    variable.ids <- 
+      tryCatch(expr = 
+                 {
+                   raw.data_filtered %>% 
+                     dplyr::mutate(variables = 
+                                     !!dplyr::enquo(variable.identifiers)) %>% 
+                     dplyr::pull("variables")
+                 }, 
+               error = function(cond) NULL)
+    # 
+    if (is.null(variable.ids)) {
+      stop("The variable.identifiers input did not work. Try a different ", 
+           "tidy-friendly input.", 
+           call. = FALSE)
+    }
+  } else {
+    variable.ids <- as.character(1:nrow(raw.data_filtered))
+  }
+  
+  # Check if variables are unique
+  if (nrow(raw.data_filtered) != length(unique(variable.ids))) 
+    stop("Declared identifiers are not unique and must be changed. A ", 
+         "different column can be declared or several columns combined.", 
+         call. = FALSE)
+  
+  # Add variables column 
+  raw.data_filtered <- raw.data_filtered %>% 
+    dplyr::mutate(variables = !!dplyr::enquo(variable.identifiers), 
+                  .before = 1)
+  
+  # Variables data
+  variables_data_unique <- map(variables.data, 
+                               \(x) length(unique(raw.data_filtered$variables)) == 
+                                 length(unique(paste0(raw.data_filtered$variables, 
+                                                      raw.data_filtered[[x]])))) %>% 
+    unlist()
+  
+  variables_data_frame <-  
+    tibble(variables = unique(raw.data_filtered$variables)) %>% 
+    left_join(raw.data_filtered %>% 
+                dplyr::select(any_of(c("variables", 
+                                       variables.data[variables_data_unique]))) %>% 
+                group_by(variables) %>% 
+                summarise(across(everything(), \(x) paste(unique(x), collapse = ";"))), 
+              by = "variables") %>% 
+    mutate(across(everything(), \(x) type.convert(x, 
+                                                  as.is = T, 
+                                                  numerals = "warn.loss"))) %>% 
+    dplyr::rename(variables = variables)
+  
+  
+  
+  # ---- Observations ---- 
+  # Make vector to rename observations
+  observations_names <- unique(raw.data_filtered[[observations]])
+  
+  observations_data <- tibble(observations = unname(observations_names))
+  
+  data_frame_list <- list()
+  
+  for (i in data.frames) {
+    
+    data_frame_list[[i]] <- raw.data_filtered %>% 
+      dplyr::filter() %>% 
+      pivot_wider(id_cols = "observations", 
+                  names_from = "variables", 
+                  values_from = all_of(i)) %>% 
+      transpose_tibble() %>% 
+      # filter(!if_any(everything(), is.na)) %>% 
+      rename(variables = rows) %>% 
+      transpose_tibble() #%>% 
+    #dplyr::mutate(observations = observations_names[observations]) %>% 
+    #arrange(match(observations, unname(observations_names)))
+    
+  }
+  
   
   # Put dataset together
   dataset <- new_dataset(variables_data_frame = variables_data_frame, 
@@ -574,8 +707,32 @@ import2new_dataset_diann_precursor_SILAC <- function(
     filter(Q.Value <= Q.Value, 
            PG.Q.Value <= PG.Q.Value, 
            Lib.Q.Value <= Lib.Q.Value, 
-           Lib.PG.Q.Value <= Lib.PG.Q.Value, 
-           Precursor.Normalised > 0)
+           Lib.PG.Q.Value <= Lib.PG.Q.Value) #, 
+  #Precursor.Normalised > 0)
+  
+  
+  # Modify SILAC precursors 
+  raw.data_filtered_temp <- raw.data_filtered %>% 
+    # mutate(Channel = ifelse(Channel == "", 
+    #                         "other", 
+    #                         Channel)) %>% 
+    split(.$Channel)
+  
+  
+  for (i in setdiff(names(raw.data_filtered_temp), "")) {
+    mod.new <- paste0(channel.mod, "-", i)
+    raw.data_filtered_temp[[i]] <- raw.data_filtered_temp[[i]] %>% 
+      mutate(Precursor.Id = str_replace_all(Precursor.Id, 
+                                            channel.mod, 
+                                            mod.new), 
+             Modified.Sequence = str_replace_all(Modified.Sequence, 
+                                                 channel.mod, 
+                                                 mod.new))
+  }
+  
+  raw.data_filtered <- dplyr::bind_rows(raw.data_filtered_temp)
+  
+  
   
   # Variables data
   variables_data_unique <- map(variables.data, 
@@ -584,19 +741,6 @@ import2new_dataset_diann_precursor_SILAC <- function(
                                                       raw.data_filtered[[x]])))) %>% 
     unlist()
   
-  
-  # Modify SILAC precursors 
-  raw.data_filtered <- raw.data_filtered %>% 
-    mutate(Precursor.Id = ifelse(nchar(Channel) > 0, 
-                                 str_replace_all(Precursor.Id, 
-                                                 channel.mod, 
-                                                 paste0(channel.mod, "-", Channel)), 
-                                 Precursor.Id), 
-           Modified.Sequence = ifelse(nchar(Channel) > 0, 
-                                      str_replace_all(Modified.Sequence, 
-                                                      channel.mod, 
-                                                      paste0(channel.mod, "-", Channel)), 
-                                      Modified.Sequence))
   
   
   variables_data_frame <-  
@@ -634,10 +778,10 @@ import2new_dataset_diann_precursor_SILAC <- function(
       pivot_wider(id_cols = "Run", 
                   names_from = "Precursor.Id", 
                   values_from = all_of(i)) %>% 
-      transpose_tibble() %>% 
+      #transpose_tibble() %>% 
       # filter(!if_any(everything(), is.na)) %>% 
-      rename(variables = rows) %>% 
-      transpose_tibble() %>% 
+      dplyr::rename(observations = Run) %>% 
+      #transpose_tibble() %>% 
       dplyr::mutate(observations = observations_names[observations]) %>% 
       arrange(match(observations, unname(observations_names)))
     

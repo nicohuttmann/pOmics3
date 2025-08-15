@@ -8,7 +8,7 @@ protein structure from the Alphafold database}
 NGLVieweR_AFdb(id)
 }
 \arguments{
-\item{id}{}
+\item{id}{UniProt accession id}
 }
 \description{
 NGLVieweR function which accepts protein accession IDs and downloads given 

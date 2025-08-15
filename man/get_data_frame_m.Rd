@@ -9,7 +9,9 @@ get_data_frame_m(
   variables,
   observations,
   dataset,
-  output.type = "tibble"
+  output.type = "tibble",
+  match_variables = T,
+  match_observations = T
 )
 }
 \arguments{
@@ -22,6 +24,12 @@ get_data_frame_m(
 \item{dataset}{dataset name}
 
 \item{output.type}{data type (default = "tibble", "data.frame", "matrix")}
+
+\item{match_variables}{Check if variables column names match between data 
+frames}
+
+\item{match_observations}{Check if observations column matches between data 
+frames}
 }
 \description{
 Assemble data frames from dataset and return as list
